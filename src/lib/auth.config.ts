@@ -1,20 +1,21 @@
 import type { NextAuthConfig } from "next-auth";
 import GitHub from "next-auth/providers/github";
 
+const githubId = process.env.AUTH_GITHUB_ID?.trim();
+const githubSecret = process.env.AUTH_GITHUB_SECRET?.trim();
+
 /**
- * Edge-compatible Auth config (used by middleware).
- * No Prisma / Node-only APIs here.
+ * Edge-compatible Auth config (middleware + shared options).
  *
- * Env (Auth.js v5 auto-reads AUTH_*):
- * - AUTH_SECRET
- * - AUTH_URL (or AUTH_TRUST_HOST=true on Vercel)
- * - AUTH_GITHUB_ID / AUTH_GITHUB_SECRET
+ * Required env on Vercel:
+ * AUTH_SECRET, AUTH_GITHUB_ID, AUTH_GITHUB_SECRET
+ * AUTH_URL (production URL), AUTH_TRUST_HOST=true, DATABASE_URL
  */
 export const authConfig = {
   providers: [
     GitHub({
-      clientId: process.env.AUTH_GITHUB_ID!,
-      clientSecret: process.env.AUTH_GITHUB_SECRET!,
+      clientId: githubId ?? "",
+      clientSecret: githubSecret ?? "",
       allowDangerousEmailAccountLinking: true,
     }),
   ],
@@ -26,14 +27,10 @@ export const authConfig = {
     authorized({ auth, request }) {
       const isLoggedIn = !!auth?.user;
       const isDashboard = request.nextUrl.pathname.startsWith("/dashboard");
-
-      if (isDashboard) {
-        return isLoggedIn;
-      }
-
+      if (isDashboard) return isLoggedIn;
       return true;
     },
   },
-  // Required on Vercel so host is trusted without manual AUTH_URL mismatch
   trustHost: true,
+  secret: process.env.AUTH_SECRET,
 } satisfies NextAuthConfig;

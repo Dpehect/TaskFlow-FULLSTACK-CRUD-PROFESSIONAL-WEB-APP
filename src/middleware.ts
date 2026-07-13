@@ -4,11 +4,15 @@ import { NextResponse } from "next/server";
 
 const { auth } = NextAuth(authConfig);
 
+/**
+ * Only protect /dashboard.
+ * Do NOT redirect /login → /dashboard here (broken/stale cookies caused loops).
+ * The login page itself redirects when a real session exists.
+ */
 export default auth((req) => {
   const { pathname } = req.nextUrl;
-  const isLoggedIn = !!req.auth;
+  const isLoggedIn = !!req.auth?.user;
   const isDashboard = pathname.startsWith("/dashboard");
-  const isLogin = pathname === "/login" || pathname.startsWith("/login/");
 
   if (isDashboard && !isLoggedIn) {
     const loginUrl = new URL("/login", req.nextUrl.origin);
@@ -16,20 +20,9 @@ export default auth((req) => {
     return NextResponse.redirect(loginUrl);
   }
 
-  // Already signed in → leave login page
-  if (isLogin && isLoggedIn) {
-    const callback = req.nextUrl.searchParams.get("callbackUrl");
-    const target =
-      callback && callback.startsWith("/") && !callback.startsWith("//")
-        ? callback
-        : "/dashboard";
-    return NextResponse.redirect(new URL(target, req.nextUrl.origin));
-  }
-
   return NextResponse.next();
 });
 
 export const config = {
-  // Do not run on static assets / api (Auth.js needs /api/auth/* without this wrapper redirect logic)
-  matcher: ["/dashboard/:path*", "/dashboard", "/login"],
+  matcher: ["/dashboard/:path*", "/dashboard"],
 };
