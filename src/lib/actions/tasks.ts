@@ -3,17 +3,10 @@
 import { revalidatePath } from "next/cache";
 import { TaskPriority, TaskStatus } from "@prisma/client";
 import { z } from "zod";
-import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { requireUserId } from "@/lib/auth-utils";
 import { isTaskStatus } from "@/lib/kanban";
-
-async function requireUserId() {
-  const session = await auth();
-  if (!session?.user?.id) {
-    throw new Error("Unauthorized");
-  }
-  return session.user.id;
-}
+import { taskFormSchema } from "@/lib/validations";
 
 /** Ensures the task belongs to the signed-in user via its project. */
 async function getOwnedTask(taskId: string, userId: string) {
@@ -240,6 +233,78 @@ export async function createTasks(
     return {
       success: false,
       error: error instanceof Error ? error.message : "Failed to create tasks",
+    };
+  }
+}
+
+const updateTaskSchema = taskFormSchema.extend({
+  taskId: z.string().min(1),
+  status: z.nativeEnum(TaskStatus).optional(),
+});
+
+/** Full task update (title, description, priority, due date, status). */
+export async function updateTask(
+  input: z.infer<typeof updateTaskSchema>
+): Promise<{ success: true } | { success: false; error: string }> {
+  try {
+    const userId = await requireUserId();
+    const data = updateTaskSchema.parse(input);
+
+    const task = await getOwnedTask(data.taskId, userId);
+    if (!task) {
+      return { success: false, error: "Task not found" };
+    }
+
+    await prisma.task.update({
+      where: { id: task.id },
+      data: {
+        title: data.title,
+        description: data.description || null,
+        priority: data.priority,
+        dueDate: data.dueDate
+          ? new Date(
+              data.dueDate.includes("T")
+                ? data.dueDate
+                : `${data.dueDate}T12:00:00`
+            )
+          : null,
+        ...(data.status ? { status: data.status } : {}),
+      },
+    });
+
+    revalidatePath(`/dashboard/projects/${task.projectId}`);
+    revalidatePath("/dashboard");
+    return { success: true };
+  } catch (error) {
+    console.error("updateTask failed:", error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Failed to update task",
+    };
+  }
+}
+
+export async function deleteTask(
+  taskId: string
+): Promise<{ success: true } | { success: false; error: string }> {
+  try {
+    const userId = await requireUserId();
+    const task = await getOwnedTask(taskId, userId);
+    if (!task) {
+      return { success: false, error: "Task not found" };
+    }
+
+    const projectId = task.projectId;
+    await prisma.task.delete({ where: { id: task.id } });
+
+    revalidatePath(`/dashboard/projects/${projectId}`);
+    revalidatePath("/dashboard");
+    return { success: true };
+  } catch (error) {
+    console.error("deleteTask failed:", error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Failed to delete task",
     };
   }
 }

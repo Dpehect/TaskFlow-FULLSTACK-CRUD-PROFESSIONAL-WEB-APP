@@ -18,8 +18,8 @@ The app emphasizes clean architecture, TypeScript safety, server actions with ow
 
 ### Core
 - **GitHub OAuth** authentication (Auth.js v5 + Prisma Adapter)
-- **Projects CRUD** — create workspaces with color accents
-- **Tasks CRUD** — title, priority, due date, status
+- **Projects CRUD** — create, edit, delete workspaces (name, description, color)
+- **Tasks CRUD** — create, edit, delete (title, description, priority, due date, status)
 - **3-column Kanban** — To Do · In Progress · Done with **@dnd-kit** drag & drop
 - Optimistic board updates with rollback + toast on failure
 - **Dashboard** — stats cards, Recharts (status pie + priority bar)
@@ -122,9 +122,12 @@ node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"
 ### 3. Database migrate
 
 ```bash
-npx prisma migrate dev --name init
-# or if schema is already migrated:
-npx prisma db push
+# Apply committed migrations (preferred)
+npx prisma migrate deploy
+# Local development / iterate schema:
+# npx prisma migrate dev
+# Or push without migration history:
+# npx prisma db push
 ```
 
 ### 4. Run

@@ -10,6 +10,7 @@ import { cn } from "@/lib/utils";
 import { getDueLabel, PRIORITY_LABELS } from "@/lib/kanban";
 import { DueLabelBadge } from "@/components/tasks/due-label-badge";
 import { SmartBreakDown } from "@/components/tasks/smart-break-down";
+import { EditTaskDialog } from "@/components/tasks/edit-task-dialog";
 
 type KanbanTaskCardProps = {
   task: ClientTask;
@@ -80,16 +81,20 @@ export function KanbanTaskCard({
           >
             <GripVertical className="size-3.5 shrink-0" aria-hidden />
           </button>
-          <p className="min-w-0 flex-1 text-sm font-medium leading-snug">
-            {task.title}
-          </p>
+          <div className="min-w-0 flex-1">
+            <p className="text-sm font-medium leading-snug">{task.title}</p>
+            {task.description ? (
+              <p className="mt-0.5 line-clamp-2 text-xs text-muted-foreground">
+                {task.description}
+              </p>
+            ) : null}
+          </div>
         </div>
 
         <div className="flex flex-wrap items-center gap-1.5 pl-5">
           <Badge variant={priorityVariant[task.priority]}>
             {PRIORITY_LABELS[task.priority]}
           </Badge>
-
           <DueLabelBadge
             dueDate={task.dueDate}
             isDone={task.status === "DONE"}
@@ -99,9 +104,14 @@ export function KanbanTaskCard({
 
         {!isDragOverlay && (
           <div
-            className="pl-5"
+            className="flex flex-wrap items-center gap-1 pl-5"
             onPointerDown={(e) => e.stopPropagation()}
           >
+            <EditTaskDialog
+              task={task}
+              compact
+              onPointerDown={(e) => e.stopPropagation()}
+            />
             <SmartBreakDown
               projectId={projectId}
               parentTitle={task.title}

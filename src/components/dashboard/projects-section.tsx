@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/card";
 import { buttonVariants } from "@/components/ui/button";
 import { CreateProjectForm } from "@/components/projects/create-project-form";
+import { ProjectActions } from "@/components/projects/project-actions";
 import type { DashboardProjectSummary } from "@/types/dashboard";
 import { cn } from "@/lib/utils";
 
@@ -60,20 +61,32 @@ export function ProjectsSection({ projects }: ProjectsSectionProps) {
                   {project.description || "No description"}
                 </CardDescription>
               </CardHeader>
-              <CardContent className="flex items-center justify-between gap-2">
+              <CardContent className="flex flex-wrap items-center justify-between gap-2">
                 <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
                   <FolderKanban className="size-3.5" />
                   {project.taskCount} tasks
                 </p>
-                <Link
-                  href={`/dashboard/projects/${project.id}`}
-                  className={cn(
-                    buttonVariants({ variant: "outline", size: "sm" })
-                  )}
-                >
-                  Open board
-                  <ArrowRight className="size-3.5" />
-                </Link>
+                <div className="flex flex-wrap items-center gap-1.5">
+                  <ProjectActions
+                    compact
+                    redirectOnDelete={false}
+                    project={{
+                      id: project.id,
+                      name: project.name,
+                      description: project.description,
+                      color: project.color,
+                    }}
+                  />
+                  <Link
+                    href={`/dashboard/projects/${project.id}`}
+                    className={cn(
+                      buttonVariants({ variant: "outline", size: "sm" })
+                    )}
+                  >
+                    Open board
+                    <ArrowRight className="size-3.5" />
+                  </Link>
+                </div>
               </CardContent>
             </Card>
           ))}

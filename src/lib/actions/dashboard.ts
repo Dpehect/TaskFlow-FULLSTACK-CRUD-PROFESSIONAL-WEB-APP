@@ -9,19 +9,16 @@ import {
 } from "@/lib/dashboard";
 import type { DashboardPayload, DashboardTask } from "@/types/dashboard";
 
-async function requireUserId() {
-  const session = await auth();
-  if (!session?.user?.id) {
-    throw new Error("Unauthorized");
-  }
-  return { userId: session.user.id, userName: session.user.name ?? null };
-}
-
 /**
  * Single round-trip for the dashboard: projects + all tasks + derived stats.
  */
 export async function getDashboardData(): Promise<DashboardPayload> {
-  const { userId, userName } = await requireUserId();
+  const session = await auth();
+  if (!session?.user?.id) {
+    throw new Error("Unauthorized");
+  }
+  const userId = session.user.id;
+  const userName = session.user.name ?? null;
 
   const projects = await prisma.project.findMany({
     where: { userId },

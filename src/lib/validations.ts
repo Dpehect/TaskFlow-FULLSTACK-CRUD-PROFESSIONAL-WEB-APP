@@ -39,3 +39,9 @@ export const taskFormSchema = z.object({
 });
 
 export type TaskFormValues = z.infer<typeof taskFormSchema>;
+
+export const editTaskFormSchema = taskFormSchema.extend({
+  status: z.nativeEnum(TaskStatus),
+});
+
+export type EditTaskFormValues = z.infer<typeof editTaskFormSchema>;

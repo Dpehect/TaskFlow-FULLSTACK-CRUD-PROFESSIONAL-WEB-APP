@@ -176,6 +176,16 @@ export function CreateTaskForm({
             </div>
 
             <div className="space-y-2">
+              <Label htmlFor="task-description">Description (optional)</Label>
+              <Input
+                id="task-description"
+                placeholder="Short notes…"
+                disabled={isPending}
+                {...form.register("description")}
+              />
+            </div>
+
+            <div className="space-y-2">
               <Label htmlFor="task-priority">Priority</Label>
               <select
                 id="task-priority"

@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { getProjectWithTasks } from "@/lib/actions/projects";
 import { KanbanBoard } from "@/components/kanban";
 import { CreateTaskForm } from "@/components/projects/create-task-form";
+import { ProjectActions } from "@/components/projects/project-actions";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import type { ClientTask } from "@/types";
@@ -65,10 +66,20 @@ export default async function ProjectBoardPage({
             </p>
           )}
         </div>
-        <CreateTaskForm
-          projectId={project.id}
-          existingTitles={project.tasks.map((t) => t.title)}
-        />
+        <div className="flex flex-wrap items-center gap-2">
+          <ProjectActions
+            project={{
+              id: project.id,
+              name: project.name,
+              description: project.description,
+              color: project.color,
+            }}
+          />
+          <CreateTaskForm
+            projectId={project.id}
+            existingTitles={project.tasks.map((t) => t.title)}
+          />
+        </div>
       </div>
 
       {clientTasks.length === 0 ? (
