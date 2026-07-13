@@ -8,8 +8,25 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+
 type LoginPageProps = {
-  searchParams: Promise<{ callbackUrl?: string }>;
+  searchParams: Promise<{ callbackUrl?: string; error?: string }>;
+};
+
+const AUTH_ERROR_MESSAGES: Record<string, string> = {
+  Configuration:
+    "Auth is misconfigured. Check AUTH_SECRET, AUTH_GITHUB_ID, and AUTH_GITHUB_SECRET on the server.",
+  AccessDenied: "Access denied. You may have cancelled GitHub authorization.",
+  Verification: "The sign-in link is no longer valid.",
+  OAuthSignin: "Could not start GitHub sign-in. Check Client ID / Secret.",
+  OAuthCallback:
+    "GitHub callback failed. Confirm the callback URL matches production exactly.",
+  OAuthCreateAccount: "Could not create your account in the database.",
+  EmailCreateAccount: "Could not create account.",
+  Callback: "Authentication callback error. Check OAuth app settings.",
+  OAuthAccountNotLinked:
+    "This email is already linked to another sign-in method.",
+  Default: "Sign-in failed. Please try again.",
 };
 
 function GitHubIcon({ className }: { className?: string }) {
@@ -33,6 +50,10 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
 
   const params = await searchParams;
   const callbackUrl = params.callbackUrl || "/dashboard";
+  const errorKey = params.error;
+  const errorMessage = errorKey
+    ? AUTH_ERROR_MESSAGES[errorKey] ?? AUTH_ERROR_MESSAGES.Default
+    : null;
 
   return (
     <div className="mx-auto flex min-h-[calc(100vh-3.5rem)] max-w-md items-center px-4 py-12">
@@ -46,7 +67,17 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
             Sign in with GitHub to manage your projects and tasks.
           </CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="space-y-4">
+          {errorMessage && (
+            <div
+              role="alert"
+              className="rounded-lg border border-destructive/30 bg-destructive/10 px-3 py-2 text-left text-sm text-destructive"
+            >
+              <p className="font-medium">Sign-in error{errorKey ? ` (${errorKey})` : ""}</p>
+              <p className="mt-1 text-destructive/90">{errorMessage}</p>
+            </div>
+          )}
+
           <form
             action={async () => {
               "use server";
@@ -58,9 +89,9 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
               Continue with GitHub
             </Button>
           </form>
-          <p className="mt-4 text-center text-xs text-muted-foreground">
-            By continuing, you agree to use TaskFlow for personal productivity
-            and portfolio demos.
+
+          <p className="text-center text-xs text-muted-foreground">
+            After GitHub authorizes you, you will return to the dashboard.
           </p>
         </CardContent>
       </Card>
