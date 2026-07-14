@@ -1,5 +1,5 @@
 import { handlers } from "@/lib/auth";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
 function missingAuthEnv(): string[] {
   const missing: string[] = [];
@@ -10,8 +10,8 @@ function missingAuthEnv(): string[] {
 }
 
 async function withConfigGuard(
-  req: Request,
-  handler: (req: Request) => Promise<Response>
+  req: NextRequest,
+  handler: (req: NextRequest) => Promise<Response>
 ) {
   const missing = missingAuthEnv();
   if (missing.length > 0) {
@@ -46,10 +46,10 @@ async function withConfigGuard(
   }
 }
 
-export async function GET(req: Request) {
+export async function GET(req: NextRequest) {
   return withConfigGuard(req, (r) => handlers.GET(r));
 }
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
   return withConfigGuard(req, (r) => handlers.POST(r));
 }
