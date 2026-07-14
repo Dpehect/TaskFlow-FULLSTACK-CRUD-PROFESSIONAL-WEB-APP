@@ -95,9 +95,6 @@ export function EditTaskDialog({
   });
 
   const onDelete = () => {
-    if (!window.confirm(`Delete “${task.title}”? This cannot be undone.`)) {
-      return;
-    }
     startTransition(async () => {
       const result = await deleteTask(task.id);
       if (!result.success) {

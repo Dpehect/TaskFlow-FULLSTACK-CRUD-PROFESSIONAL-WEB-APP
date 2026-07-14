@@ -78,13 +78,6 @@ export function ProjectActions({
   });
 
   const onDelete = () => {
-    if (
-      !window.confirm(
-        `Delete project “${project.name}” and all its tasks? This cannot be undone.`
-      )
-    ) {
-      return;
-    }
     startTransition(async () => {
       const result = await deleteProject(project.id);
       if (!result.success) {
