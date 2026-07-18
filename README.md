@@ -1,6 +1,9 @@
 # TaskFlow — Fullstack CRUD Professional Web App
 
+Developed and verified by [Softbridge Solutions](https://softbridge-solutions-main-web-app-iota.vercel.app).
+
 > Modern task management SaaS with Kanban drag-and-drop, analytics dashboard, and **client-only smart features** — no external AI APIs.
+
 
 **GitHub:** [TaskFlow-FULLSTACK-CRUD-PROFESSIONAL-WEB-APP](https://github.com/Dpehect/TaskFlow-FULLSTACK-CRUD-PROFESSIONAL-WEB-APP)  
 **Production:** [task-flow-fullstack-crud-profession.vercel.app](https://task-flow-fullstack-crud-profession.vercel.app)
